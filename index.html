@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VOL&lt;GO&gt; Options Terminal</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="terminal-shell">
+    <header class="topbar">
+      <div class="brand-cluster">
+        <div class="brand-mark">VOL&lt;GO&gt;</div>
+        <div class="brand-meta">
+          <span class="live-dot"></span>
+          <span>Options Analytics Terminal</span>
+        </div>
+      </div>
+      <div class="command-strip">
+        <span class="command-label">Command</span>
+        <input id="commandInput" type="text" value="PRICE SPX CALL EUROPEAN" aria-label="Terminal command input">
+        <button id="runCommandBtn" class="accent-button">Run</button>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <section class="hero-panel glow-panel">
+        <div>
+          <p class="panel-kicker">Multi-model router</p>
+          <h1>Price vanilla and exotic options in a live terminal workflow.</h1>
+          <p class="hero-copy">
+            Black-Scholes, binomial tree, Monte Carlo, Heston comparison, Greeks, strategy scans,
+            payoff analytics, and implied volatility heatmaps in one desk view.
+          </p>
+        </div>
+        <div class="hero-ticker-grid">
+          <div class="ticker-card"><span class="ticker-label">Spot</span><strong id="heroSpot">100.00</strong></div>
+          <div class="ticker-card"><span class="ticker-label">Theo</span><strong id="heroPrice">10.45</strong></div>
+          <div class="ticker-card"><span class="ticker-label">Model</span><strong id="heroModel">Black-Scholes</strong></div>
+          <div class="ticker-card"><span class="ticker-label">Signal</span><strong id="heroSignal">Neutral</strong></div>
+        </div>
+      </section>
+
+      <section class="market-ribbon">
+        <div class="ribbon-card"><span class="ribbon-title">Desk Clock</span><strong id="deskClock">--:--:--</strong></div>
+        <div class="ribbon-card"><span class="ribbon-title">Vol Regime</span><strong id="volRegime">Balanced</strong></div>
+        <div class="ribbon-card"><span class="ribbon-title">Moneyness</span><strong id="moneynessBadge">ATM</strong></div>
+        <div class="ribbon-card"><span class="ribbon-title">95% CI</span><strong id="confidenceBand">n/a</strong></div>
+      </section>
+
+      <section class="workspace-grid">
+        <aside class="left-stack">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="panel-kicker">Pricing Ticket</p>
+                <h2>Contract Setup</h2>
+              </div>
+              <button id="resetDefaultsBtn" class="ghost-button">Reset</button>
+            </div>
+            <form id="pricingForm" class="terminal-form">
+              <label><span>Underlying</span><input id="underlyingInput" name="underlying" type="text" value="SPX"></label>
+              <label><span>Spot</span><input id="spotInput" name="spot" type="number" step="0.01" value="100"></label>
+              <label><span>Strike</span><input id="strikeInput" name="strike" type="number" step="0.01" value="100"></label>
+              <label><span>Expiry (years)</span><input id="expiryInput" name="expiry" type="number" step="0.01" value="1"></label>
+              <label><span>Rate</span><input id="rateInput" name="rate" type="number" step="0.0001" value="0.05"></label>
+              <label><span>Vol</span><input id="volInput" name="vol" type="number" step="0.0001" value="0.2"></label>
+              <label><span>Dividend Yield</span><input id="dividendInput" name="dividend" type="number" step="0.0001" value="0"></label>
+              <label>
+                <span>Type</span>
+                <select id="optionTypeInput" name="optionType">
+                  <option value="call">Call</option>
+                  <option value="put">Put</option>
+                </select>
+              </label>
+              <label>
+                <span>Style</span>
+                <select id="styleInput" name="style">
+                  <option value="european">European</option>
+                  <option value="american">American</option>
+                  <option value="asian">Asian</option>
+                  <option value="barrier">Barrier</option>
+                  <option value="lookback">Lookback</option>
+                  <option value="digital">Digital</option>
+                </select>
+              </label>
+              <label>
+                <span>Use Heston Overlay</span>
+                <select id="hestonToggleInput" name="useHeston">
+                  <option value="off">Off</option>
+                  <option value="on">On</option>
+                </select>
+              </label>
+              <div class="subsection-title">Exotic Parameters</div>
+              <label><span>Barrier Level</span><input id="barrierInput" name="barrier" type="number" step="0.01" value="115"></label>
+              <label>
+                <span>Barrier Type</span>
+                <select id="barrierTypeInput" name="barrierType">
+                  <option value="up_and_out">Up and Out</option>
+                  <option value="up_and_in">Up and In</option>
+                  <option value="down_and_out">Down and Out</option>
+                  <option value="down_and_in">Down and In</option>
+                </select>
+              </label>
+              <label><span>Rebate</span><input id="rebateInput" name="rebate" type="number" step="0.01" value="0"></label>
+              <label>
+                <span>Average Type</span>
+                <select id="avgTypeInput" name="avgType">
+                  <option value="arithmetic">Arithmetic</option>
+                  <option value="geometric">Geometric</option>
+                </select>
+              </label>
+              <label><span>Monitoring Steps</span><input id="avgFreqInput" name="avgFreq" type="number" step="1" value="252"></label>
+              <label>
+                <span>Lookback Type</span>
+                <select id="lookbackTypeInput" name="lookbackType">
+                  <option value="floating">Floating</option>
+                  <option value="fixed">Fixed</option>
+                </select>
+              </label>
+              <label><span>Digital Payout</span><input id="cashPayoutInput" name="cashPayout" type="number" step="0.01" value="10"></label>
+              <label><span>Monte Carlo Sims</span><input id="simsInput" name="sims" type="number" step="1000" value="20000"></label>
+              <label><span>Tree Steps</span><input id="treeStepsInput" name="treeSteps" type="number" step="10" value="250"></label>
+              <button type="submit" class="accent-button full-width">Price Contract</button>
+            </form>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="panel-kicker">Strategy Scanner</p>
+                <h2>Desk Recommendations</h2>
+              </div>
+            </div>
+            <div class="strategy-controls">
+              <label><span>Outlook</span><select id="outlookInput"><option value="bullish">Bullish</option><option value="bearish">Bearish</option><option value="neutral" selected>Neutral</option></select></label>
+              <label><span>Vol View</span><select id="volViewInput"><option value="long">Long Vol</option><option value="short">Short Vol</option><option value="neutral" selected>Neutral</option></select></label>
+              <label><span>Risk</span><select id="riskInput"><option value="low">Low</option><option value="moderate" selected>Moderate</option><option value="high">High</option></select></label>
+            </div>
+            <div id="strategyList" class="strategy-list"></div>
+          </div>
+        </aside>
+
+        <section class="main-stack">
+          <div class="analytics-grid">
+            <div class="stat-panel"><span>Theoretical Value</span><strong id="theoValue">$0.00</strong><small id="priceAnnotation">Model-driven estimate</small></div>
+            <div class="stat-panel"><span>Delta</span><strong id="deltaValue">0.0000</strong><small>Directional exposure</small></div>
+            <div class="stat-panel"><span>Gamma</span><strong id="gammaValue">0.0000</strong><small>Convexity</small></div>
+            <div class="stat-panel"><span>Vega</span><strong id="vegaValue">0.0000</strong><small>Vol sensitivity</small></div>
+            <div class="stat-panel"><span>Theta</span><strong id="thetaValue">0.0000</strong><small>Time decay</small></div>
+            <div class="stat-panel"><span>Rho</span><strong id="rhoValue">0.0000</strong><small>Rate sensitivity</small></div>
+          </div>
+
+          <div class="split-panels">
+            <div class="panel">
+              <div class="panel-header"><div><p class="panel-kicker">Model Tape</p><h2>Pricing Diagnostics</h2></div></div>
+              <div id="diagnostics" class="diagnostics-list"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-header"><div><p class="panel-kicker">Surface</p><h2>Implied Volatility Heatmap</h2></div></div>
+              <div id="ivHeatmap" class="heatmap"></div>
+            </div>
+          </div>
+
+          <div class="split-panels">
+            <div class="panel chart-panel">
+              <div class="panel-header"><div><p class="panel-kicker">Risk Map</p><h2>Payoff Profile</h2></div></div>
+              <svg id="payoffChart" viewBox="0 0 640 280" preserveAspectRatio="none"></svg>
+            </div>
+            <div class="panel chart-panel">
+              <div class="panel-header"><div><p class="panel-kicker">Smile Deck</p><h2>Volatility Smile</h2></div></div>
+              <svg id="smileChart" viewBox="0 0 640 280" preserveAspectRatio="none"></svg>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header"><div><p class="panel-kicker">Terminal Log</p><h2>Activity Feed</h2></div></div>
+            <div id="terminalLog" class="terminal-log"></div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
