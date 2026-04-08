@@ -455,6 +455,67 @@ function addLog(message) {
   $("terminalLog").prepend(entry);
 }
 
+function flashElement(element) {
+  if (!element) return;
+  element.classList.remove("value-flash");
+  void element.offsetWidth;
+  element.classList.add("value-flash");
+  window.setTimeout(() => element.classList.remove("value-flash"), 420);
+}
+
+function pulsePanel(element) {
+  if (!element) return;
+  element.classList.remove("pulse-panel");
+  void element.offsetWidth;
+  element.classList.add("pulse-panel");
+  window.setTimeout(() => element.classList.remove("pulse-panel"), 620);
+}
+
+function setAnimatedText(id, nextValue) {
+  const element = $(id);
+  if (!element) return;
+  if (element.textContent !== nextValue) {
+    element.textContent = nextValue;
+    flashElement(element);
+    if (element.closest(".stat-panel, .ticker-card, .ribbon-card")) {
+      pulsePanel(element.closest(".stat-panel, .ticker-card, .ribbon-card"));
+    }
+    return;
+  }
+  element.textContent = nextValue;
+}
+
+function animateStagger(selector, baseDelay = 0, step = 55) {
+  document.querySelectorAll(selector).forEach((node, index) => {
+    node.setAttribute("data-stagger", "true");
+    node.style.setProperty("--delay", `${baseDelay + index * step}ms`);
+  });
+}
+
+function animateHeatmapCells() {
+  document.querySelectorAll(".heatmap-cell").forEach((cell, index) => {
+    cell.style.transitionDelay = `${index * 24}ms`;
+    requestAnimationFrame(() => cell.classList.add("is-visible"));
+  });
+}
+
+function animateSvgPath(svg) {
+  if (!svg) return;
+  svg.classList.remove("is-refreshing");
+  void svg.offsetWidth;
+  svg.classList.add("is-refreshing");
+  const path = svg.querySelector("path");
+  if (path) {
+    const length = path.getTotalLength();
+    path.style.strokeDasharray = `${length}`;
+    path.style.strokeDashoffset = `${length}`;
+    path.getBoundingClientRect();
+    path.style.transition = "stroke-dashoffset 720ms cubic-bezier(0.22, 1, 0.36, 1)";
+    path.style.strokeDashoffset = "0";
+  }
+  window.setTimeout(() => svg.classList.remove("is-refreshing"), 520);
+}
+
 function renderDiagnostics(result, contract) {
   const items = [
     { label: "Model", value: result.modelUsed },
@@ -490,6 +551,8 @@ function renderHeatmap(data) {
     cell.innerHTML = `<span>K ${item.K.toFixed(0)} | T ${item.T.toFixed(2)}</span><strong>${item.iv.toFixed(1)}%</strong>`;
     root.appendChild(cell);
   });
+  animateHeatmapCells();
+  pulsePanel(root.closest(".panel"));
 }
 
 function renderLineChart(svg, points, title, xLabel, stroke) {
@@ -513,6 +576,7 @@ function renderLineChart(svg, points, title, xLabel, stroke) {
     <text x="${pad}" y="18" fill="#80a0ba" font-family="Consolas" font-size="11">${title}</text>
     <text x="${width - pad - 100}" y="${height - 10}" fill="#80a0ba" font-family="Consolas" font-size="11">${xLabel}</text>
   `;
+  animateSvgPath(svg);
 }
 
 function syncInputs() {
@@ -589,24 +653,25 @@ function renderStrategies(contract) {
     });
     $("strategyList").appendChild(card);
   });
+  pulsePanel($("strategyList").closest(".panel"));
 }
 
 function updateDashboard(result, contract) {
   const greeks = result.greeks || {};
-  $("heroSpot").textContent = contract.S.toFixed(2);
-  $("heroPrice").textContent = result.price.toFixed(2);
-  $("heroModel").textContent = result.modelUsed;
-  $("heroSignal").textContent = state.outlook.charAt(0).toUpperCase() + state.outlook.slice(1);
-  $("theoValue").textContent = formatCurrency(result.price);
-  $("deltaValue").textContent = (greeks.delta || 0).toFixed(4);
-  $("gammaValue").textContent = (greeks.gamma || 0).toFixed(4);
-  $("vegaValue").textContent = (greeks.vega || 0).toFixed(4);
-  $("thetaValue").textContent = (greeks.theta || 0).toFixed(4);
-  $("rhoValue").textContent = (greeks.rho || 0).toFixed(4);
-  $("priceAnnotation").textContent = result.modelUsed;
-  $("volRegime").textContent = state.sigma > 0.35 ? "High Vol" : state.sigma < 0.18 ? "Low Vol" : "Balanced";
-  $("moneynessBadge").textContent = moneyness(contract);
-  $("confidenceBand").textContent = result.ci95 ? formatRange(result.ci95) : "n/a";
+  setAnimatedText("heroSpot", contract.S.toFixed(2));
+  setAnimatedText("heroPrice", result.price.toFixed(2));
+  setAnimatedText("heroModel", result.modelUsed);
+  setAnimatedText("heroSignal", state.outlook.charAt(0).toUpperCase() + state.outlook.slice(1));
+  setAnimatedText("theoValue", formatCurrency(result.price));
+  setAnimatedText("deltaValue", (greeks.delta || 0).toFixed(4));
+  setAnimatedText("gammaValue", (greeks.gamma || 0).toFixed(4));
+  setAnimatedText("vegaValue", (greeks.vega || 0).toFixed(4));
+  setAnimatedText("thetaValue", (greeks.theta || 0).toFixed(4));
+  setAnimatedText("rhoValue", (greeks.rho || 0).toFixed(4));
+  setAnimatedText("priceAnnotation", result.modelUsed);
+  setAnimatedText("volRegime", state.sigma > 0.35 ? "High Vol" : state.sigma < 0.18 ? "Low Vol" : "Balanced");
+  setAnimatedText("moneynessBadge", moneyness(contract));
+  setAnimatedText("confidenceBand", result.ci95 ? formatRange(result.ci95) : "n/a");
   renderDiagnostics(result, contract);
   renderHeatmap(generateHeatmap(contract));
   renderLineChart($("smileChart"), generateSmile(contract), "Synthetic IV Smile", "Strike", "#38d4ff");
@@ -683,6 +748,11 @@ $("resetDefaultsBtn").addEventListener("click", () => {
 
 setInterval(updateClock, 1000);
 updateClock();
+animateStagger(".topbar", 0, 0);
+animateStagger(".hero-panel", 70, 0);
+animateStagger(".market-ribbon .ribbon-card", 120, 45);
+animateStagger(".left-stack .panel, .main-stack > .analytics-grid .stat-panel, .main-stack > .split-panels .panel, .main-stack > .panel", 180, 40);
+requestAnimationFrame(() => document.body.classList.add("is-ready"));
 syncInputs();
 priceCurrentTicket(false);
 addLog("VOL<GO> terminal initialized.");
